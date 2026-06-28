@@ -23,7 +23,11 @@ export interface StartOption {
 
 export interface RouteBuilderProps {
   bars: StartOption[];
-  /** When set (from ?src=), the start is locked and the dropdown is hidden. */
+  /**
+   * When set (from ?src=), the start defaults to this bar with a locked look.
+   * The user can still override it via the "Change start" affordance — a shared
+   * link carries the scanner's src, so a friend at a different bar needs a way out.
+   */
   lockedStart: StartOption | null;
 }
 
@@ -33,6 +37,10 @@ export default function RouteBuilder({ bars, lockedStart }: RouteBuilderProps) {
   const [start, setStart] = useState<string>(lockedStart?.bar_id ?? "");
   const [preference, setPreference] = useState<Preference | null>(null);
   const [vibe, setVibe] = useState<Vibe | null>(null);
+  // Reveal the picker over a locked (scanned) start when the user isn't there.
+  // The locked scanned bar stays the primary state; the picker appears when
+  // there's no valid src, or once the user opts to override the scanned bar.
+  const [overriding, setOverriding] = useState(false);
 
   const ready = start !== "" && preference !== null && vibe !== null;
 
@@ -48,10 +56,20 @@ export default function RouteBuilder({ bars, lockedStart }: RouteBuilderProps) {
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
           Start
         </h2>
-        {lockedStart ? (
-          <p className="text-lg">
-            Starting from <span className="font-semibold">{lockedStart.bar_name}</span>
-          </p>
+        {lockedStart && !overriding ? (
+          <div className="flex flex-wrap items-baseline gap-3">
+            <p className="text-lg">
+              Starting from{" "}
+              <span className="font-semibold">{lockedStart.bar_name}</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setOverriding(true)}
+              className="text-sm text-blue-600 underline"
+            >
+              Not here? Change start
+            </button>
+          </div>
         ) : (
           <select
             value={start}
