@@ -35,6 +35,9 @@ pipeline/verify/
 .DS_Store
 *.pem
 
+# ---- Claude Code local config (machine-specific; never commit) ----
+.claude/
+
 # ---- Logs ----
 npm-debug.log*
 yarn-debug.log*
