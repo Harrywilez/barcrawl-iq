@@ -1,0 +1,45 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# ---- Node / Next.js ----
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/coverage
+.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- Python pipeline ----
+.venv/
+__pycache__/
+*.pyc
+pipeline/cache/
+# throwaway connection-test scripts — not shipped:
+pipeline/verify/
+
+# ---- Environment / secrets (NEVER commit secrets) ----
+.env
+.env.local
+.env.*
+# ...but the template of variable NAMES is meant to be committed:
+!.env.example
+
+# ---- OS / editor / misc ----
+.DS_Store
+*.pem
+
+# ---- Logs ----
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- Vercel ----
+.vercel

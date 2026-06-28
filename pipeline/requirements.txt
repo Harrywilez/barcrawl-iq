@@ -1,0 +1,12 @@
+# BarCrawl IQ data pipeline — direct dependencies (pinned to the versions installed
+# into pipeline/.venv on setup). Recreate the env with:
+#   uv venv --python 3.12 pipeline/.venv
+#   uv pip install -r pipeline/requirements.txt
+# (or: source pipeline/.venv/bin/activate && pip install -r pipeline/requirements.txt)
+
+pandas==3.0.3
+requests==2.34.2
+supabase==2.31.0
+qrcode[pil]==8.2        # the [pil] extra pulls in pillow (image backend for QR codes)
+python-dotenv==1.2.2
+tenacity==9.1.4
