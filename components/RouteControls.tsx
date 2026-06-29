@@ -1,11 +1,11 @@
 /**
- * Below-the-route controls on the result page (presentational reskin surface):
- *   - "← Change my picks" returns to the builder with the start bar preserved.
- *   - "Show another option" cycles the rank via a ?rank= link (shareable URL).
+ * Below-the-route controls on the result page (Paper design):
+ *   - "Show another option (N of M)" cycles the rank via a ?rank= link.
  *   - "Copy link" copies the current URL.
+ *   - "← Change my picks" returns to the builder with the start bar preserved.
  *
  * All navigation is plain <Link> so the rank lives in the URL, not client state.
- * Hrefs + the option label are computed by the (server) page and passed in.
+ * Returns a fragment so the actions group spaces the row + link as siblings.
  */
 import Link from "next/link";
 import CopyLinkButton from "./CopyLinkButton";
@@ -24,24 +24,33 @@ export default function RouteControls({
   anotherOptionHref,
   changePicksHref,
 }: RouteControlsProps) {
+  // "Option 2 of 3" -> "2 of 3" for the in-button count.
+  const count = optionLabel.replace(/^Option\s+/i, "");
+
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4 text-sm">
-      <Link href={changePicksHref} className="text-blue-600 underline">
-        ← Change my picks
+    <>
+      <div className="flex gap-[9px]">
+        {anotherOptionHref && (
+          <Link
+            href={anotherOptionHref}
+            className="paper-card paper-press min-w-0 flex-[1.85] px-1.5 py-3 text-center"
+          >
+            <span className="whitespace-nowrap font-sans text-[12px] font-bold text-ink">
+              Show another option{" "}
+              <span className="text-[rgba(24,48,92,0.5)]">({count})</span>
+            </span>
+          </Link>
+        )}
+
+        <CopyLinkButton />
+      </div>
+
+      <Link
+        href={changePicksHref}
+        className="paper-link mx-auto mt-px block px-1 py-[5px] text-center font-sans text-[12.5px] font-semibold tracking-[0.1px] text-[rgba(24,48,92,0.6)]"
+      >
+        <span className="text-red">←</span> Change my picks
       </Link>
-
-      <span className="text-gray-500">{optionLabel}</span>
-
-      {anotherOptionHref && (
-        <Link
-          href={anotherOptionHref}
-          className="rounded-md border border-gray-300 px-3 py-1.5 hover:border-gray-400"
-        >
-          Show another option
-        </Link>
-      )}
-
-      <CopyLinkButton />
-    </div>
+    </>
   );
 }

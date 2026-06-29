@@ -2,7 +2,8 @@
  * Canonical option lists + friendly labels for the crawl builder.
  *
  * The `value` strings are CANONICAL — they must match the DB columns and the URL
- * segments exactly. The `label` strings are what we show humans. UI components
+ * segments exactly. The `label` strings are what we show humans; `sublabel` is
+ * the small descriptor shown beneath each option in the Paper UI. UI components
  * should iterate these arrays so the picker and the URL never drift apart.
  */
 import type { Preference, Vibe } from "./types";
@@ -10,20 +11,22 @@ import type { Preference, Vibe } from "./types";
 export interface Option<T> {
   value: T;
   label: string;
+  /** Small secondary descriptor under the label (Paper design). */
+  sublabel: string;
 }
 
 /** Order here is the order the buttons render in (Page 1). */
 export const PREFERENCES: ReadonlyArray<Option<Preference>> = [
-  { value: "lowest_cost", label: "Cheapest" },
-  { value: "highest_quality", label: "Highest Rated" },
-  { value: "shortest_walk", label: "Shortest Walk" },
+  { value: "lowest_cost", label: "Cheapest", sublabel: "Cheap beer" },
+  { value: "highest_quality", label: "Highest Rated", sublabel: "Top cocktails" },
+  { value: "shortest_walk", label: "Shortest Walk", sublabel: "Less stumbling" },
 ];
 
 export const VIBES: ReadonlyArray<Option<Vibe>> = [
-  { value: "party", label: "Party" },
-  { value: "classy", label: "Classy" },
-  { value: "dive", label: "Dive" },
-  { value: "chill", label: "Chill" },
+  { value: "party", label: "Party", sublabel: "Packed & loud" },
+  { value: "classy", label: "Cocktail", sublabel: "Craft & quiet" },
+  { value: "dive", label: "Dive", sublabel: "Cheap & gritty" },
+  { value: "chill", label: "Chill", sublabel: "Low & slow" },
 ];
 
 const PREFERENCE_VALUES = new Set(PREFERENCES.map((p) => p.value));

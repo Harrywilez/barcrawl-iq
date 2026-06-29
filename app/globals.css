@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ----------------------------------------------------------------------------
+   Paper design tokens (exact values decoded from the design bundle).
+   ---------------------------------------------------------------------------- */
+@theme {
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  --color-paper: #f6f1e6;
+  --color-ink: #18305c;
+  --color-red: #c5302f;
+  --color-gold: #e8b24a;
+  --color-ink-deep: #0f1f3f;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f6f1e6;
+  color: #18305c;
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep native text controls >= 16px so iOS Safari never zooms on focus. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* ----------------------------------------------------------------------------
+   Layout — full-height paper screen + the bordered "ticket" poster frame.
+   ---------------------------------------------------------------------------- */
+.paper-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f6f1e6;
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding-left: max(6px, env(safe-area-inset-left));
+  padding-right: max(6px, env(safe-area-inset-right));
+}
+
+/* Poster frame: hairline navy border + a paper gap + an inner navy ring. */
+.paper-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #18305c;
+  box-shadow:
+    inset 0 0 0 3px #f6f1e6,
+    inset 0 0 0 4px rgba(24, 48, 92, 0.5);
+  border-radius: 46px;
+}
+
+/* ----------------------------------------------------------------------------
+   Surfaces — white cards, selected overlay, badges, CTA, links.
+   ---------------------------------------------------------------------------- */
+
+/* White card with a hairline navy border (start block, options, stop cards). */
+.paper-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(24, 48, 92, 0.2);
+  border-radius: 13px;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Selected-option overlay — navy ring + faint navy wash (rendered when chosen). */
+.paper-card-sel {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #18305c;
+  border-radius: 13px;
+  background: rgba(24, 48, 92, 0.06);
+  pointer-events: none;
+}
+
+/* Secondary cards that press down a hair on tap (Show another option / Copy). */
+.paper-press {
+  transition: transform 0.1s ease;
+}
+.paper-press:active {
+  transform: translateY(1px);
+}
+
+/* Primary CTA — solid navy with a hard drop-shadow that presses on tap. */
+.paper-cta {
+  position: relative;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  background: #18305c;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 #0f1f3f;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.paper-cta:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 #0f1f3f;
+}
+.paper-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+.paper-cta:disabled:active {
+  transform: none;
+  box-shadow: 0 3px 0 #0f1f3f;
+}
+
+/* Numbered stop badge — navy disc, cream numeral. */
+.paper-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #18305c;
+  color: #f6f1e6;
+}
+
+/* Small icon disc on the start block — paper fill, navy hairline. */
+.paper-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f6f1e6;
+  border: 1px solid rgba(24, 48, 92, 0.18);
+}
+
+/* Plain text-link buttons (Change start / Change my picks). */
+.paper-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.12s ease;
+}
+.paper-link:hover {
+  opacity: 0.8;
+}
+.paper-link:active {
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-cta,
+  .paper-press,
+  .paper-link {
+    transition: none;
+  }
 }

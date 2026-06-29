@@ -1,20 +1,40 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Archivo, Playfair_Display, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Paper design type system, loaded via next/font (self-hosted, no runtime
+// Google <link>): Archivo = sans body (variable, 400–800), Playfair Display =
+// serif display incl. italic (variable), Space Mono = mono labels (400/700).
+const archivo = Archivo({
   subsets: ["latin"],
+  variable: "--font-archivo",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const playfair = Playfair_Display({
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
 });
 
 export const metadata: Metadata = {
-  title: "Bar Crawl IQ",
-  description: "Smart 4-bar walking crawls for the Lower East Side.",
+  title: "BarCrawl IQ",
+  description: "Smart routes for a great night out.",
+};
+
+// iOS target: viewport-fit=cover so the paper bg reaches the screen edges
+// (pages re-pad with safe-area insets); theme-color tints the status bar paper.
+export const viewport: Viewport = {
+  themeColor: "#f6f1e6",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -25,9 +45,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${playfair.variable} ${spaceMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-[100dvh] flex-col">{children}</body>
     </html>
   );
 }

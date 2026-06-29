@@ -46,3 +46,6 @@ yarn-error.log*
 
 # ---- Vercel ----
 .vercel
+
+# ---- Paper redesign reference (mockup; not shipped) ----
+design/
