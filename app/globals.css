@@ -1,26 +1,694 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================================
+   BarCrawl IQ — Phase 6 design system
+   ----------------------------------------------------------------------------
+   Tokens + glass primitives lifted verbatim from the design mockups
+   (design/landing.html, design/result.html). The exact colour/gradient/shadow
+   values live here so every component reuses one source of truth.
+
+   iOS-Safari rules baked in below:
+     • every glass surface ships BOTH -webkit-backdrop-filter and backdrop-filter
+     • the blur radius is HARD-CODED (Safari ignores CSS vars inside
+       -webkit-backdrop-filter) and kept at 14px (<= the ~14px ceiling)
+     • opaque @supports + prefers-reduced-transparency fallbacks keep text legible
+     • motion is transform/opacity only and respects prefers-reduced-motion
+   ============================================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope), -apple-system, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-manrope), system-ui,
+    sans-serif;
+
+  /* Curated palette — exact hex from the mockups. */
+  --color-brand: #ef5f54; /* the red */
+  --color-brand-deep: #e2463c;
+  --color-cream: #f7f5ef; /* warm off-white headings/text */
+  --color-navy: #0c1738; /* deep navy base */
+  --color-navy-deep: #070a16;
+  --color-steel: #243c74; /* steel-blue accent */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #0c1738;
+  --foreground: #f7f5ef;
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keep native text controls >= 16px so iOS Safari never zooms on focus.
+   (Buttons don't trigger focus-zoom, and the design's button labels are
+   intentionally smaller than 16px — they set their own size.) */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* ----------------------------------------------------------------------------
+   App backdrop: navy radial base + red/blue glow accents + a lightweight
+   fireworks spark field (soft halos + tiny sparks — a CSS approximation of the
+   mockup's bursts). Fixed + behind all content.
+   ---------------------------------------------------------------------------- */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #0c1738;
+  background-image:
+    /* warm glow top-right (firework ambience) */
+    radial-gradient(
+      100% 70% at 84% 4%,
+      rgba(222, 76, 68, 0.41) 0%,
+      rgba(222, 76, 68, 0) 60%
+    ),
+    /* cool glow top-left */
+    radial-gradient(
+      95% 65% at 10% 12%,
+      rgba(96, 144, 248, 0.31) 0%,
+      rgba(96, 144, 248, 0) 55%
+    ),
+    /* faint warm city-glow on the horizon, behind the skyline */
+    radial-gradient(
+      120% 62% at 50% 103%,
+      rgba(232, 116, 74, 0.3) 0%,
+      rgba(232, 116, 74, 0) 56%
+    ),
+    /* base: lively steel-blue sky up top → deep night toward the bottom */
+    radial-gradient(
+      140% 108% at 50% -8%,
+      #243c74 0%,
+      #16264f 36%,
+      #0b1430 66%,
+      #060c1c 100%
+    );
+}
+
+/* Deep-night vignette — darkens the lower half so the skyline reads as a city
+   at night. The bright fireworks live up top, drawn as a separate SVG layer. */
+.app-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 9, 20, 0) 44%,
+    rgba(5, 7, 15, 0.55) 74%,
+    rgba(3, 5, 11, 0.92) 100%
+  );
+}
+
+/* Tiny sparks scattered across the top third. */
+.app-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(circle at 83% 12%, rgba(255, 224, 184, 0.95) 0, transparent 1.6px),
+    radial-gradient(circle at 88% 17%, rgba(255, 224, 184, 0.8) 0, transparent 1.4px),
+    radial-gradient(circle at 79% 18%, rgba(255, 255, 255, 0.8) 0, transparent 1.2px),
+    radial-gradient(circle at 90% 9%, rgba(255, 206, 128, 0.85) 0, transparent 1.4px),
+    radial-gradient(circle at 75% 9%, rgba(255, 255, 255, 0.6) 0, transparent 1px),
+    radial-gradient(circle at 13% 20%, rgba(176, 224, 255, 0.85) 0, transparent 1.5px),
+    radial-gradient(circle at 17% 25%, rgba(255, 255, 255, 0.7) 0, transparent 1.2px),
+    radial-gradient(circle at 8% 26%, rgba(120, 228, 212, 0.8) 0, transparent 1.4px),
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.55) 0, transparent 1px),
+    radial-gradient(circle at 66% 31%, rgba(255, 224, 184, 0.7) 0, transparent 1.3px),
+    radial-gradient(circle at 71% 37%, rgba(255, 255, 255, 0.55) 0, transparent 1px),
+    radial-gradient(circle at 45% 7%, rgba(255, 255, 255, 0.5) 0, transparent 1px),
+    radial-gradient(circle at 56% 12%, rgba(255, 206, 128, 0.55) 0, transparent 1.2px),
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.45) 0, transparent 1px);
+}
+
+/* ----------------------------------------------------------------------------
+   Layout — phone-first centred column with safe-area padding.
+   ---------------------------------------------------------------------------- */
+.screen {
+  width: 100%;
+  max-width: 460px;
+  margin-inline: auto;
+  padding-left: max(22px, env(safe-area-inset-left));
+  padding-right: max(22px, env(safe-area-inset-right));
+  padding-top: max(30px, env(safe-area-inset-top));
+  padding-bottom: max(30px, env(safe-area-inset-bottom));
+}
+
+/* ----------------------------------------------------------------------------
+   Glass primitives
+   ---------------------------------------------------------------------------- */
+
+/* Large glass panel — the "Starting from" surface (exact values from design/). */
+.glass-panel {
+  position: relative;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.13);
+  backdrop-filter: blur(16px) saturate(180%) brightness(1.13);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.4),
+    0 4px 10px rgba(0, 0, 0, 0.26),
+    inset 0 2.5px 1px rgba(255, 255, 255, 1),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.5),
+    inset 0 0 16px rgba(255, 255, 255, 0.12),
+    inset 0 -14px 24px rgba(22, 40, 82, 0.24);
+}
+/* Glossy sheen overlays for the start panel (rendered as child spans so the
+   panel content, which comes after them + is positioned, stays on top). */
+.glass-panel__sheen-top {
+  position: absolute;
+  top: 2px;
+  left: 7%;
+  right: 7%;
+  height: 36%;
+  border-radius: 50% / 22px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+.glass-panel__sheen-bottom {
+  position: absolute;
+  bottom: 2px;
+  left: 16%;
+  right: 16%;
+  height: 30%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0) 74%
+  );
+  filter: blur(1px);
+}
+
+/* Route stop card — exact glass treatment ported from design/result.html. */
+.glass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(185%) brightness(1.14);
+  backdrop-filter: blur(16px) saturate(185%) brightness(1.14);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.4),
+    0 4px 10px rgba(0, 0, 0, 0.26),
+    inset 0 2.5px 1px rgba(255, 255, 255, 1),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.5),
+    inset 0 0 16px rgba(255, 255, 255, 0.12),
+    inset 0 -14px 24px rgba(22, 40, 82, 0.24);
+}
+/* The card's three glossy overlays (top sheen + top-down veil + bottom glow),
+   rendered as child spans before the content so the content stays on top. */
+.glass-card__sheen-top {
+  position: absolute;
+  top: 2px;
+  left: 7%;
+  right: 7%;
+  height: 30%;
+  border-radius: 50% / 22px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.13) 50%,
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+.glass-card__veil {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.11) 0%,
+    rgba(255, 255, 255, 0.02) 36%,
+    rgba(255, 255, 255, 0) 60%
+  );
+}
+.glass-card__sheen-bottom {
+  position: absolute;
+  bottom: 2px;
+  left: 16%;
+  right: 16%;
+  height: 26%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0) 74%
+  );
+  filter: blur(1px);
+}
+
+/* ============================================================================
+   Glossy button system — ported verbatim from the design HTML (design/).
+   Each button = a base surface + two sheen overlays (bright top highlight +
+   soft bottom glow) + a label lifted above the sheens; the press state is the
+   design's exact `style-active` (translate + scale + dimmed shadow), using
+   transform/filter only. The sheen/ring spans are emitted by the shared
+   components/ButtonFaces helpers so every button stays in sync.
+   Blur radii are HARD-CODED (Safari ignores CSS vars in -webkit-backdrop-filter).
+   ============================================================================ */
+
+/* --- Red hero (See My Route, Open Full Route in Google Maps) --- */
+.btn-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 30px;
+  padding: 18px;
+  cursor: pointer;
+  background: linear-gradient(
+    177deg,
+    rgba(255, 116, 92, 0.85) 0%,
+    rgba(225, 68, 58, 0.83) 46%,
+    rgba(187, 47, 39, 0.85) 100%
+  );
+  -webkit-backdrop-filter: blur(13px) saturate(172%) brightness(1.05);
+  backdrop-filter: blur(13px) saturate(172%) brightness(1.05);
+  box-shadow:
+    0 18px 36px rgba(214, 58, 50, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.28),
+    inset 0 2.5px 1px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 3px rgba(255, 210, 200, 0.42),
+    inset 0 0 18px rgba(255, 255, 255, 0.1),
+    inset 0 -14px 22px rgba(120, 24, 18, 0.42);
+  transition:
+    transform 0.13s ease,
+    box-shadow 0.13s ease,
+    filter 0.13s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-hero:hover {
+  filter: brightness(1.05) saturate(1.05);
+}
+.btn-hero:active {
+  transform: translateY(2px) scale(0.986);
+  box-shadow:
+    0 8px 18px rgba(214, 60, 52, 0.4),
+    inset 0 2px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -7px 14px rgba(120, 24, 18, 0.5);
+  filter: brightness(0.97);
+}
+.btn-hero:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.5) brightness(0.85);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.3),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.35);
+}
+.btn-hero__sheen-top {
+  position: absolute;
+  top: 3px;
+  left: 7%;
+  right: 7%;
+  height: 48%;
+  border-radius: 50% / 26px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.28) 46%,
+    rgba(255, 255, 255, 0.04) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+.btn-hero__sheen-bottom {
+  position: absolute;
+  bottom: 3px;
+  left: 18%;
+  right: 18%;
+  height: 30%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 228, 218, 0.38),
+    rgba(255, 228, 218, 0) 74%
+  );
+  filter: blur(1.5px);
+}
+.btn-hero__label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(110, 20, 16, 0.5);
+}
+
+/* --- Glass toggle pill (vibe + priority) --- */
+.btn-pill {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 22px;
+  padding: 14px 6px;
+  cursor: pointer;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.14);
+  backdrop-filter: blur(16px) saturate(180%) brightness(1.14);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.34),
+    0 3px 6px rgba(0, 0, 0, 0.24),
+    inset 0 2.5px 1px rgba(255, 255, 255, 1),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.5),
+    inset 0 0 14px rgba(255, 255, 255, 0.12),
+    inset 0 -10px 18px rgba(22, 40, 82, 0.22);
+  transition:
+    transform 0.13s ease,
+    filter 0.13s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-pill:hover {
+  filter: brightness(1.06);
+}
+.btn-pill:active {
+  transform: translateY(1px) scale(0.955);
+  filter: brightness(0.97);
+}
+.btn-pill__sheen-top {
+  position: absolute;
+  top: 2px;
+  left: 8%;
+  right: 8%;
+  height: 46%;
+  border-radius: 50% / 20px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.12) 56%,
+    rgba(255, 255, 255, 0) 82%
+  );
+}
+.btn-pill__sheen-bottom {
+  position: absolute;
+  bottom: 2px;
+  left: 18%;
+  right: 18%;
+  height: 30%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 255, 255, 0.36),
+    rgba(255, 255, 255, 0) 74%
+  );
+  filter: blur(1px);
+}
+/* Selected ring overlay — rendered only on the chosen pill (layered on top). */
+.btn-pill__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  border: 1.5px solid rgba(239, 95, 84, 0.95);
+  background: rgba(239, 95, 84, 0.1);
+  box-shadow:
+    0 0 16px 1px rgba(226, 70, 60, 0.5),
+    inset 0 0 10px rgba(239, 95, 84, 0.16);
+}
+.btn-pill__label {
+  position: relative;
+  display: block;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  color: rgba(247, 245, 239, 0.96);
+  text-shadow: 0 1px 2px rgba(10, 18, 42, 0.5);
+  white-space: nowrap;
+}
+.btn-pill__label--sm {
+  font-size: 11px;
+}
+
+/* --- Secondary glass button (Show another option, Copy link, Back to start) --- */
+.btn-secondary {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  padding: 14px 8px;
+  cursor: pointer;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.14);
+  backdrop-filter: blur(16px) saturate(180%) brightness(1.14);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.36),
+    0 3px 7px rgba(0, 0, 0, 0.26),
+    inset 0 2.5px 1px rgba(255, 255, 255, 1),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.5),
+    inset 0 0 16px rgba(255, 255, 255, 0.12),
+    inset 0 -12px 20px rgba(22, 40, 82, 0.22);
+  transition:
+    transform 0.13s ease,
+    box-shadow 0.13s ease,
+    filter 0.13s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-secondary:hover {
+  filter: brightness(1.06);
+}
+.btn-secondary:active {
+  transform: translateY(1px) scale(0.974);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.3),
+    inset 0 2px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -6px 14px rgba(22, 40, 82, 0.3);
+  filter: brightness(0.98);
+}
+.btn-secondary__sheen-top {
+  position: absolute;
+  top: 2px;
+  left: 7%;
+  right: 7%;
+  height: 44%;
+  border-radius: 50% / 22px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.12) 56%,
+    rgba(255, 255, 255, 0) 82%
+  );
+}
+.btn-secondary__sheen-bottom {
+  position: absolute;
+  bottom: 2px;
+  left: 16%;
+  right: 16%;
+  height: 32%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 255, 255, 0.38),
+    rgba(255, 255, 255, 0) 74%
+  );
+  filter: blur(1px);
+}
+.btn-secondary__label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.05px;
+  color: rgba(246, 244, 238, 0.96);
+  text-shadow: 0 1px 2px rgba(10, 18, 42, 0.5);
+  white-space: nowrap;
+}
+
+/* --- Plain text link buttons (Change start / Change my picks) --- */
+.btn-textlink {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: rgba(245, 243, 237, 0.6);
+  transition:
+    color 0.13s ease,
+    opacity 0.13s ease,
+    transform 0.13s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-textlink:hover {
+  color: rgba(245, 243, 237, 0.9);
+}
+.btn-textlink:active {
+  transform: scale(0.98);
+}
+
+/* Off-white numbered badge on a route card (exact values from design/). */
+.stop-badge {
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(222, 232, 251, 0.86) 55%,
+    rgba(202, 216, 243, 0.82) 100%
+  );
+  box-shadow:
+    inset 0 2.5px 1.5px rgba(255, 255, 255, 1),
+    inset 0 -3.5px 6px rgba(54, 78, 138, 0.34),
+    inset 0 0 6px rgba(255, 255, 255, 0.5),
+    0 6px 14px rgba(0, 0, 0, 0.5);
+  color: #15264f;
+}
+
+/* Translucent glass circle holding the red target on the start panel (design/). */
+.start-target {
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.24),
+    rgba(255, 255, 255, 0.08)
+  );
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.7),
+    0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Neon glow for the line-art skyline (landing footer). Static; the stroke
+   colours live on the SVG, the glow is stacked drop-shadows here. */
+.skyline-neon {
+  filter:
+    drop-shadow(0 0 0.1px rgba(143, 192, 255, 0.7))
+    drop-shadow(0 0 0.3px rgba(143, 192, 255, 0.42));
+}
+
+/* ----------------------------------------------------------------------------
+   Motion — transform/opacity only.
+   ---------------------------------------------------------------------------- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ef5f54;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ----------------------------------------------------------------------------
+   Legibility fallbacks — when blur is unsupported or the user reduces
+   transparency/motion, swap to opaque navy glass so text never washes out.
+   ---------------------------------------------------------------------------- */
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass-panel,
+  .glass-card,
+  .btn-pill,
+  .btn-secondary {
+    background: rgba(24, 36, 64, 0.92);
+  }
+  .btn-hero {
+    background: #d8443c;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel,
+  .glass-card,
+  .btn-pill,
+  .btn-secondary {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(24, 36, 64, 0.95);
+  }
+  .btn-hero {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #d8443c;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+  .spinner {
+    animation-duration: 1.6s;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -5,6 +5,9 @@
  * combo (anon reads), renders the one named by ?rank= (default 1), and computes
  * the cycle for "Show another option". The route is fully derived from the URL,
  * so reloading or sharing the link — including the rank — reproduces it exactly.
+ *
+ * Phase 6 is a visual reskin only: every line of routing/data/analytics logic
+ * below is unchanged from before.
  */
 import Link from "next/link";
 import { getBarsByIds, getRoutesForCombo } from "@/lib/queries";
@@ -13,6 +16,7 @@ import RouteView from "@/components/RouteView";
 import RouteControls from "@/components/RouteControls";
 import RouteGeneratedTracker from "@/components/RouteGeneratedTracker";
 import AgeDisclaimer from "@/components/AgeDisclaimer";
+import { HeroFace } from "@/components/ButtonFaces";
 
 export default async function RoutePage({
   params,
@@ -39,8 +43,7 @@ export default async function RoutePage({
   const availableRanks = routes.map((r) => r.rank);
   const rawRank = Array.isArray(rankParam) ? rankParam[0] : rankParam;
   const requestedRank = Number(rawRank);
-  const current =
-    routes.find((r) => r.rank === requestedRank) ?? routes[0];
+  const current = routes.find((r) => r.rank === requestedRank) ?? routes[0];
 
   const bars = await getBarsByIds(current.stops);
 
@@ -55,36 +58,39 @@ export default async function RoutePage({
   const changePicksHref = `/e/les?src=${start}`;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-12">
+    <main className="screen flex flex-1 flex-col">
       {/* Anonymous 'route_generated' event — fire-and-forget, renders nothing. */}
       <RouteGeneratedTracker start={start} preference={preference} vibe={vibe} />
 
       <RouteView route={current} bars={bars} />
-      <div className="mt-6">
-        <RouteControls
-          optionLabel={optionLabel}
-          anotherOptionHref={anotherOptionHref}
-          changePicksHref={changePicksHref}
-        />
+
+      <RouteControls
+        optionLabel={optionLabel}
+        anotherOptionHref={anotherOptionHref}
+        changePicksHref={changePicksHref}
+      />
+
+      <div className="mt-auto pt-10">
+        <AgeDisclaimer />
       </div>
-      <AgeDisclaimer />
     </main>
   );
 }
 
 function RouteNotFound() {
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-12">
-      <h1 className="text-2xl font-bold">Route not found</h1>
-      <p className="mt-2 text-gray-600">
-        We couldn&apos;t find a crawl for that link. Let&apos;s build a new one.
-      </p>
-      <Link
-        href="/e/les"
-        className="mt-6 inline-block rounded-md bg-black px-5 py-3 font-semibold text-white"
-      >
-        Build a crawl
-      </Link>
+    <main className="screen flex flex-1 flex-col justify-center">
+      <div className="glass-panel animate-fade-up px-6 py-8 text-center">
+        <h1 className="font-display text-[24px] font-bold text-cream">
+          Route not found
+        </h1>
+        <p className="mt-3 text-[14px] text-white/60">
+          We couldn&apos;t find a crawl for that link. Let&apos;s build a new one.
+        </p>
+        <Link href="/e/les" className="btn-hero mt-6 inline-block">
+          <HeroFace>Build a crawl</HeroFace>
+        </Link>
+      </div>
     </main>
   );
 }

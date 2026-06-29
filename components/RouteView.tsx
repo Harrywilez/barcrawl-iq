@@ -1,14 +1,21 @@
 /**
- * Presentational view of one ranked crawl: heading + ordered stop cards +
- * totals + the "open in Google Maps" hand-off.
+ * Presentational view of one ranked crawl: header (eyebrow + dynamic title +
+ * stats subtitle) + ordered glass stop cards + the "open in Google Maps"
+ * hand-off.
  *
  * Pure + props-only (no fetching, no client state). `bars` MUST already be in
- * walking order (route.stops order) — the caller guarantees that. This is the
- * main reskin surface for Phase 6.
+ * walking order (route.stops order) — the caller guarantees that.
+ *
+ * Phase 6 reskin: the title is derived from the route's REAL preference/vibe via
+ * the canonical label helpers ("Your Cheapest Party Crawl"), and the stats are
+ * folded into the mockup's single subtitle line. The Maps URL builder and the
+ * per-leg walk minutes are unchanged — only presentation differs.
  */
 import type { Bar, Route } from "@/lib/types";
 import { buildWalkingMapsUrl } from "@/lib/maps";
+import { preferenceLabel, vibeLabel } from "@/lib/constants";
 import BarCard from "./BarCard";
+import { HeroFace } from "./ButtonFaces";
 
 export interface RouteViewProps {
   route: Route;
@@ -18,18 +25,31 @@ export interface RouteViewProps {
 export default function RouteView({ route, bars }: RouteViewProps) {
   const mapsUrl = buildWalkingMapsUrl(bars);
 
+  // Display-only rounding — never mutates the stored values.
   const totalWalkMin = Math.round(route.total_walk_min);
-  const costs = bars.map((b) => b.avg_cost);
-  const minCost = Math.min(...costs);
-  const maxCost = Math.max(...costs);
-  const costRange =
-    minCost === maxCost ? `$${minCost}` : `$${minCost}–$${maxCost}`;
+  const avgDrink = Math.round(route.selected_avg_cost);
+  const title = `Your ${preferenceLabel(route.preference)} ${vibeLabel(
+    route.vibe,
+  )} Crawl`;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">{route.explanation}</h1>
+      <header className="animate-fade-up">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
+          Lower East Side
+        </p>
 
-      <ol className="mt-6 flex flex-col gap-3">
+        <h1 className="mt-3 font-display text-[29px] font-extrabold leading-[1.12] tracking-[-0.02em] text-cream">
+          {title}
+        </h1>
+
+        <p className="mt-2.5 text-[14px] text-white/60">
+          {bars.length} stops · {totalWalkMin} min walking · ~${avgDrink}/drink
+        </p>
+      </header>
+
+      <ol className="mt-7 flex flex-col">
         {bars.map((bar, i) => (
           <BarCard
             key={bar.bar_id}
@@ -44,27 +64,27 @@ export default function RouteView({ route, bars }: RouteViewProps) {
         ))}
       </ol>
 
-      <dl className="mt-6 grid grid-cols-2 gap-2 text-sm">
-        <dt className="text-gray-500">Total walking</dt>
-        <dd>≈ {totalWalkMin} min ({route.total_distance_m} m)</dd>
-
-        <dt className="text-gray-500">Drink cost</dt>
-        <dd>
-          {costRange} per stop (avg ${route.selected_avg_cost})
-        </dd>
-
-        <dt className="text-gray-500">Avg rating</dt>
-        <dd>{route.selected_avg_rating} ★</dd>
-      </dl>
-
       <a
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-6 inline-block rounded-md bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+        className="btn-hero mt-6 block w-full"
       >
-        Open Full Route in Google Maps →
+        <HeroFace>
+          <TargetIcon className="h-[17px] w-[17px]" />
+          Open Full Route in Google Maps
+        </HeroFace>
       </a>
     </div>
+  );
+}
+
+/** White target/crosshair shown on the red Maps hero (matches design/result). */
+function TargetIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className={className} aria-hidden="true">
+      <circle cx="9" cy="9" r="6.2" stroke="#fff" strokeWidth="1.7" />
+      <circle cx="9" cy="9" r="2.1" fill="#fff" />
+    </svg>
   );
 }

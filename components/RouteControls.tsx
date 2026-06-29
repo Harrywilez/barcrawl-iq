@@ -1,14 +1,18 @@
 /**
  * Below-the-route controls on the result page (presentational reskin surface):
- *   - "← Change my picks" returns to the builder with the start bar preserved.
- *   - "Show another option" cycles the rank via a ?rank= link (shareable URL).
+ *   - "Show another option (N of M)" cycles the rank via a ?rank= link.
  *   - "Copy link" copies the current URL.
+ *   - "← Change my picks" returns to the builder with the start bar preserved.
  *
  * All navigation is plain <Link> so the rank lives in the URL, not client state.
  * Hrefs + the option label are computed by the (server) page and passed in.
+ * Phase 6.2: secondary glass buttons + text link ported from the design HTML
+ * (.btn-secondary / .btn-textlink + ButtonFaces). The "N of M" count still comes
+ * straight from the unchanged optionLabel.
  */
 import Link from "next/link";
 import CopyLinkButton from "./CopyLinkButton";
+import { SecondaryFace } from "./ButtonFaces";
 
 export interface RouteControlsProps {
   /** e.g. "Option 2 of 3". */
@@ -24,24 +28,27 @@ export default function RouteControls({
   anotherOptionHref,
   changePicksHref,
 }: RouteControlsProps) {
+  // "Option 2 of 3" -> "2 of 3" for the in-button count.
+  const count = optionLabel.replace(/^Option\s+/i, "");
+
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4 text-sm">
-      <Link href={changePicksHref} className="text-blue-600 underline">
-        ← Change my picks
-      </Link>
+    <div className="mt-4">
+      {/* Design row: wider "show another" (flex 1.85) + "copy link" (flex 1). */}
+      <div className="flex gap-2.5">
+        {anotherOptionHref && (
+          <Link href={anotherOptionHref} className="btn-secondary flex-[1.85]">
+            <SecondaryFace>Show another option ({count})</SecondaryFace>
+          </Link>
+        )}
 
-      <span className="text-gray-500">{optionLabel}</span>
+        <CopyLinkButton />
+      </div>
 
-      {anotherOptionHref && (
-        <Link
-          href={anotherOptionHref}
-          className="rounded-md border border-gray-300 px-3 py-1.5 hover:border-gray-400"
-        >
-          Show another option
+      <div className="mt-4 text-center">
+        <Link href={changePicksHref} className="btn-textlink text-[13px]">
+          ← Change my picks
         </Link>
-      )}
-
-      <CopyLinkButton />
+      </div>
     </div>
   );
 }

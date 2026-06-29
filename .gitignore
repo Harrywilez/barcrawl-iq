@@ -46,3 +46,6 @@ yarn-error.log*
 
 # ---- Vercel ----
 .vercel
+
+# ---- Phase 6 design reference (mockups/screenshots; not shipped) ----
+design/

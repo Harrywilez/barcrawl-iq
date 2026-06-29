@@ -6,14 +6,17 @@
  * Holds only UI selection state and turns the choices into a route URL. All
  * canonical values come from lib/constants so the buttons and the URL can never
  * drift. No data fetching here — the bar list is handed in by the server page.
+ *
+ * Phase 6.2: the buttons now use the shared glossy button system ported from the
+ * design HTML (.btn-hero / .btn-pill + ButtonFaces). The selection state, the
+ * ?src lock + "Change start" override, the <select>, and the navigation are all
+ * unchanged — only the button markup/classes differ.
  */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  PREFERENCES,
-  VIBES,
-} from "@/lib/constants";
+import { PREFERENCES, VIBES } from "@/lib/constants";
 import type { Preference, Vibe } from "@/lib/types";
+import { HeroFace, PillFace } from "./ButtonFaces";
 
 /** Minimal shape the picker needs — slimmed from the full Bar row. */
 export interface StartOption {
@@ -49,84 +52,95 @@ export default function RouteBuilder({ bars, lockedStart }: RouteBuilderProps) {
     router.push(`/r/${start}/${preference}/${vibe}`);
   }
 
+  // Show the dropdown when there's no valid lock, or once the user overrides it.
+  const showPicker = !lockedStart || overriding;
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       {/* Step 1 — start bar */}
       <section>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Start
-        </h2>
-        {lockedStart && !overriding ? (
-          <div className="flex flex-wrap items-baseline gap-3">
-            <p className="text-lg">
-              Starting from{" "}
-              <span className="font-semibold">{lockedStart.bar_name}</span>
+        <div className="glass-panel flex items-center gap-[14px] px-4 py-[15px]">
+          <span aria-hidden="true" className="glass-panel__sheen-top" />
+          <span aria-hidden="true" className="glass-panel__sheen-bottom" />
+
+          <span className="start-target relative flex h-10 w-10 shrink-0 items-center justify-center">
+            <TargetIcon className="h-[18px] w-[18px]" />
+          </span>
+
+          <div className="relative min-w-0 flex-1">
+            <p className="font-display text-[10px] font-semibold uppercase tracking-[2px] text-[rgba(245,243,237,0.55)]">
+              Starting from
             </p>
-            <button
-              type="button"
-              onClick={() => setOverriding(true)}
-              className="text-sm text-blue-600 underline"
-            >
-              Not here? Change start
-            </button>
+
+            {showPicker ? (
+              <div className="relative">
+                <select
+                  value={start}
+                  onChange={(e) => setStart(e.target.value)}
+                  className="-ml-0.5 mt-0.5 w-full appearance-none truncate rounded-md bg-transparent pr-6 text-[17px] font-bold text-cream outline-none"
+                >
+                  <option value="">Choose a starting bar…</option>
+                  {bars.map((b) => (
+                    <option key={b.bar_id} value={b.bar_id} className="text-navy">
+                      {b.bar_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronIcon className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" />
+              </div>
+            ) : (
+              <p className="mt-0.5 truncate text-[17px] font-bold tracking-[-0.2px] text-[#faf8f2] [text-shadow:0_1px_3px_rgba(8,16,38,0.5)]">
+                {lockedStart!.bar_name}
+              </p>
+            )}
           </div>
-        ) : (
-          <select
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            className="w-full max-w-sm rounded-md border border-gray-300 p-2"
+        </div>
+
+        {/* "Change start" only matters over a locked scanned start. */}
+        {lockedStart && !overriding && (
+          <button
+            type="button"
+            onClick={() => setOverriding(true)}
+            className="btn-textlink mt-3 pl-1 text-[12.5px]"
           >
-            <option value="">Choose a starting bar…</option>
-            {bars.map((b) => (
-              <option key={b.bar_id} value={b.bar_id}>
-                {b.bar_name}
-              </option>
-            ))}
-          </select>
+            Not here? <span className="text-brand">Change start</span>
+          </button>
         )}
       </section>
 
-      {/* Step 2 — preference */}
+      {/* Step 2 — vibe */}
       <section>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Priority
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {PREFERENCES.map((p) => (
+        <SectionLabel>Pick your vibe</SectionLabel>
+        <div className="flex gap-2">
+          {VIBES.map((v) => (
             <button
-              key={p.value}
+              key={v.value}
               type="button"
-              onClick={() => setPreference(p.value)}
-              className={`rounded-md border px-4 py-2 ${
-                preference === p.value
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
+              aria-pressed={vibe === v.value}
+              onClick={() => setVibe(v.value)}
+              className="btn-pill"
             >
-              {p.label}
+              <PillFace selected={vibe === v.value}>{v.label}</PillFace>
             </button>
           ))}
         </div>
       </section>
 
-      {/* Step 3 — vibe */}
+      {/* Step 3 — priority */}
       <section>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Vibe
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {VIBES.map((v) => (
+        <SectionLabel>Pick your priority</SectionLabel>
+        <div className="flex gap-2">
+          {PREFERENCES.map((p) => (
             <button
-              key={v.value}
+              key={p.value}
               type="button"
-              onClick={() => setVibe(v.value)}
-              className={`rounded-md border px-4 py-2 ${
-                vibe === v.value
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
+              aria-pressed={preference === p.value}
+              onClick={() => setPreference(p.value)}
+              className="btn-pill"
             >
-              {v.label}
+              <PillFace selected={preference === p.value} compact>
+                {p.label}
+              </PillFace>
             </button>
           ))}
         </div>
@@ -136,10 +150,50 @@ export default function RouteBuilder({ bars, lockedStart }: RouteBuilderProps) {
         type="button"
         onClick={seeRoute}
         disabled={!ready}
-        className="self-start rounded-md bg-black px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className="btn-hero mt-1 w-full"
       >
-        See my route
+        <HeroFace>
+          <span>See My Route</span>
+          <span aria-hidden="true">→</span>
+        </HeroFace>
       </button>
     </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-3 pl-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
+      {children}
+    </h2>
+  );
+}
+
+/** Red target/crosshair shown on the glass start badge (matches design/landing). */
+function TargetIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className={className} aria-hidden="true">
+      <circle cx="9" cy="9" r="6.4" stroke="#ef5f54" strokeWidth="1.8" />
+      <circle cx="9" cy="9" r="2.3" fill="#ef5f54" />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
