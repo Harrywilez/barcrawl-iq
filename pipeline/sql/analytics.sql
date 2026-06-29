@@ -20,7 +20,7 @@
 
 create table if not exists public.analytics_events (
     id            bigint generated always as identity primary key,
-    event_type    text not null,        -- 'scan' | 'route_generated'
+    event_type    text not null,        -- 'scan' | 'route_generated' | 'maps_opened'
     session_id    text,                 -- random anonymous per-visit token (NOT a user id)
     source_bar_id text,                 -- the ?src= bar for scans (nullable)
     start_bar_id  text,                 -- for route_generated (nullable)

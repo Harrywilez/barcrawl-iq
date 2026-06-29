@@ -71,3 +71,32 @@ export function trackRouteGenerated(args: {
     vibe: args.vibe,
   });
 }
+
+/**
+ * Fired when the user taps "Open Full Route in Google Maps". Same session_id as
+ * scan/route_generated so it links into the funnel, plus the route they left on
+ * (start_bar_id + preference + vibe). `vibe` is the canonical underlying value
+ * ('classy', even though the UI shows "Cocktail").
+ *
+ * CRITICAL: fire-and-forget. The caller must NOT await this and the click must
+ * open Maps regardless — the insert is kicked off without blocking navigation
+ * (which is why it may slightly undercount; that's expected). Deduped once per
+ * combo per visit, mirroring route_generated.
+ */
+export function trackMapsOpened(args: {
+  start: string;
+  preference: string;
+  vibe: string;
+}): void {
+  const session_id = getSessionId();
+  if (alreadyFired(`maps_opened:${args.start}:${args.preference}:${args.vibe}`)) {
+    return;
+  }
+  void insertEvent({
+    event_type: "maps_opened",
+    session_id,
+    start_bar_id: args.start,
+    preference: args.preference,
+    vibe: args.vibe,
+  });
+}

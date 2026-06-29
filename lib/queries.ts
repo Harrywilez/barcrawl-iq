@@ -10,7 +10,7 @@ import { supabase } from "./supabaseClient";
 import type { Bar, Preference, Route, Vibe } from "./types";
 
 const BAR_COLUMNS =
-  "bar_id,bar_name,address,lat,lng,rating,review_count,bayesian_score,avg_cost,vibe_consolidated";
+  "bar_id,bar_name,address,lat,lng,rating,review_count,bayesian_score,avg_cost,vibe_consolidated,place_id";
 
 /** All 25 active bars, alphabetised — used to populate the start picker. */
 export async function getActiveBars(): Promise<Bar[]> {

@@ -13,6 +13,7 @@ import { preferenceLabel, vibeLabel } from "@/lib/constants";
 import BarCard from "./BarCard";
 import RouteControls from "./RouteControls";
 import AgeDisclaimer from "./AgeDisclaimer";
+import MapsHandoffButton from "./MapsHandoffButton";
 
 export interface RouteViewProps {
   route: Route;
@@ -94,16 +95,15 @@ export default function RouteView({
 
       {/* Actions + footer */}
       <div className="flex flex-col gap-[9px]">
-        <a
+        {/* Maps hand-off (client): opens the route AND fires the anonymous
+            'maps_opened' event fire-and-forget — see MapsHandoffButton. The
+            canonical route fields are recorded (vibe stays 'classy'). */}
+        <MapsHandoffButton
           href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="paper-cta block px-4 py-[15px]"
-        >
-          <span className="flex items-center justify-center gap-[9px] font-sans text-[13.5px] font-extrabold tracking-[0.2px] text-paper">
-            <MapsTarget className="h-4 w-4" /> Open Full Route in Google Maps
-          </span>
-        </a>
+          start={route.start_bar_id}
+          preference={route.preference}
+          vibe={route.vibe}
+        />
 
         <RouteControls
           optionLabel={optionLabel}
@@ -114,15 +114,5 @@ export default function RouteView({
         <AgeDisclaimer />
       </div>
     </>
-  );
-}
-
-/** Gold target/crosshair on the Maps CTA (matches design). */
-function MapsTarget({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 18 18" fill="none" className={className} aria-hidden="true">
-      <circle cx="9" cy="9" r="6.2" stroke="#e8b24a" strokeWidth="1.7" />
-      <circle cx="9" cy="9" r="2.1" fill="#e8b24a" />
-    </svg>
   );
 }

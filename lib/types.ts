@@ -24,6 +24,12 @@ export interface Bar {
   avg_cost: number;
   /** Pipe-joined consolidated vibe tags, e.g. "party|dive". */
   vibe_consolidated: string;
+  /**
+   * Google Places place_id for the real business listing. NULL when no clean
+   * match was found (the Maps hand-off then falls back to name+address). May be
+   * absent on callers that don't select it — treat missing/null the same.
+   */
+  place_id: string | null;
 }
 
 /** One walking leg between two consecutive stops on a route. */
