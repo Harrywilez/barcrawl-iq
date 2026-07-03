@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Playfair_Display, Space_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // Paper design type system, loaded via next/font (self-hosted, no runtime
@@ -47,7 +48,10 @@ export default function RootLayout({
       lang="en"
       className={`${archivo.variable} ${playfair.variable} ${spaceMono.variable} antialiased`}
     >
-      <body className="flex min-h-[100dvh] flex-col">{children}</body>
+      <body className="flex min-h-[100dvh] flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
